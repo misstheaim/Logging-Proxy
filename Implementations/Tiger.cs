@@ -30,4 +30,29 @@ internal class Tiger : IAnimal
         Console.WriteLine("Animal {0} doesn't like {1}", Name, food.Name);
         return false;
     }
+
+    public void Eat()
+    {
+        Console.WriteLine("The {0} is eating!");
+    }
+
+    public void Eat(int count)
+    {
+        Console.WriteLine("The {0} has eaten {1} portion(s) of food.", Name, count);
+    }
+
+    public int Run(int distance, int speed)
+    {
+        return distance / speed;
+    }
+
+    public double Run(int time, double speed)
+    {
+        return time * speed;
+    }
+
+    public void MakeNoise()
+    {
+        Console.WriteLine("Rrrrrrr");
+    }
 }

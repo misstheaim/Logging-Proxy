@@ -48,25 +48,49 @@ internal class LoggingProxy<T> : DynamicObject where T : class
     public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
     {
         result = null;
-        StringBuilder consoleMessage = new ();
+        StringBuilder consoleMessage = new();
 
         consoleMessage.Append($"You are invoking method {binder.Name}");
         if (args != null && args.Length > 0)
         {
             consoleMessage.Append($", with parameters: ");
-            foreach ( var arg in args )
+            foreach (var arg in args)
             {
                 consoleMessage.Append(arg?.ToString() + "; ");
             }
-        } 
+        }
+
+        Console.WriteLine(consoleMessage);
 
         Type type = typeof(T);
-        result = type.GetMethod(binder.Name)?.Invoke(obj, args);
-        if (result is not null)
+        MethodInfo? method = type.GetMethods().Where(m => m.Name.Equals(binder.Name)
+                && m.GetParameters().Length == (args == null ? 0 : args.Length)).FirstOrDefault(m =>
         {
-            Console.WriteLine(consoleMessage);
+            ParameterInfo[] parameters = m.GetParameters();
+            bool isParamsTypesEqual = true;
+            int index = 0;
+            foreach (var param in parameters)
+            {
+                if (args[index] != null && !param.ParameterType.IsAssignableFrom(args[index].GetType())) isParamsTypesEqual = false;
+                index++;
+            };
+            return isParamsTypesEqual;
+        });
+
+        bool isVoid = false;
+
+        if (method != null)
+        {
+            result = method.Invoke(obj, args);
+            isVoid = method.ReturnType == typeof(void);
+        }
+        
+        if (result is not null || isVoid)
+        {
+            Console.WriteLine($"Method { binder.Name} is successfully invoked.");
             return true;
         }
+        Console.WriteLine($"Method {binder.Name} invocation is failed.");
         return false;
     }
 }
